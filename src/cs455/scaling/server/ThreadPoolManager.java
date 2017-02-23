@@ -32,7 +32,7 @@ public class ThreadPoolManager {
 		ThreadPoolManager manager = new ThreadPoolManager(5);
 		manager.initialize();
 		
-		for (int i = 0; i < 5000; i++) {
+		for (int i = 0; i < 50000000; i++) {
 			manager.addTask(new Task("Hello -- " + i));
 		}
 		

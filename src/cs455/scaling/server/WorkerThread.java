@@ -24,14 +24,18 @@ public class WorkerThread extends Thread {
 				processTask(workQueue.get());
 				threadPool.increment();
 			} catch (NoSuchAlgorithmException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 		}
 	}
 	
 	private void processTask(Task task) throws NoSuchAlgorithmException {
-		System.out.println(this.getName() + SHA1FromBytes(task.getBytes()));
+		workDone++;
+		if (workDone % 10000 == 0) 
+			System.out.println(this.getName() + SHA1FromBytes(task.getBytes()) + " WORK: " + workDone);
+		else {
+			SHA1FromBytes(task.getBytes());
+		}
 	}
 	
 	private String SHA1FromBytes(byte[] bytes) throws NoSuchAlgorithmException {
