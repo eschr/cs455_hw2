@@ -17,6 +17,7 @@ public class Server {
 	
 	public void initiate() throws IOException {
 		threadPoolManager = new ThreadPoolManager(workerThreadCount);
+		threadPoolManager.initialize();
 		try {
 			ServerChannel serverChannel = new ServerChannel(portNum, this);
 			new Thread(serverChannel).start();
@@ -36,6 +37,6 @@ public class Server {
 	}
 	
 	public void acceptRead(SelectionKey key) {
-		threadPoolManager.addTask(new Task(key));
+		threadPoolManager.addTask(new Task(key, 1));
 	}
 }

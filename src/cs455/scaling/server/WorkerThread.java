@@ -2,6 +2,7 @@ package cs455.scaling.server;
 
 import java.io.IOException;
 import java.math.BigInteger;
+import java.nio.channels.SelectionKey;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
@@ -11,12 +12,15 @@ import cs455.scaling.resources.Task;
 public class WorkerThread extends Thread {
 	
 	private final ThreadPool threadPool;
+	private static int workDone = 0;
+	private static final  int READ = 1;
+	private static final int HASH = 2;
+	private static final int WRITE = 3;
 	private final BlockingQueue workQueue;
-	private int workDone = 0;
 	
 	public WorkerThread(ThreadPool pool, BlockingQueue queue) {
 		threadPool = pool;
-		workQueue = queue;
+		this.workQueue = queue;
 	}
 	
 	public void run() {
@@ -33,14 +37,32 @@ public class WorkerThread extends Thread {
 		}
 	}
 	
+	private synchronized void incrementWork() { workDone++; }
+	
 	private void processTask(Task task) throws NoSuchAlgorithmException, IOException {
-		workDone++;
-		task.readFromChannel();
-		if (workDone % 10000 == 0) 
+		incrementWork();
+		int type = task.getType();
+		if (type == READ) {
+			SelectionKey key = task.getKey();
+		    key.interestOps(key.interestOps() & (~SelectionKey.OP_READ));
+			task.readAndSendBackEcho();
+			key.interestOps (key.interestOps(  ) | SelectionKey.OP_READ);
+            // Cycle the selector so this key is active again
+            key.selector().wakeup(  );
+		}
+		else if (type == HASH) {
+			System.out.println(this.getName() + SHA1FromBytes(task.getBytes()) + " WORK: " + workDone);
+		}
+		else {
+			//Do write actions
+		}
+		
+		/*
+		if (workDone % 100 == 0) 
 			System.out.println(this.getName() + SHA1FromBytes(task.getBytes()) + " WORK: " + workDone);
 		else {
 			SHA1FromBytes(task.getBytes());
-		}
+		}*/
 	}
 	
 	private String SHA1FromBytes(byte[] bytes) throws NoSuchAlgorithmException {

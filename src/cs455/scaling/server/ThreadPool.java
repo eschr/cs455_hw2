@@ -8,13 +8,14 @@ import cs455.scaling.resources.Task;
 public class ThreadPool {
 	
 	private int workerThreadCount;
-	private WorkerThread[] threadPool;
+	private LinkedList<WorkerThread> idleWorkers;
 	private final BlockingQueue taskQueue;
 	private int count;
 	
 	public ThreadPool(int size, BlockingQueue queue) {
 		workerThreadCount = size; 
 		taskQueue = queue;
+		idleWorkers = new LinkedList<WorkerThread>();
 	}
 	
 	public synchronized void increment() {
@@ -24,16 +25,30 @@ public class ThreadPool {
 	public int getCount() { return count; }
 	
 	public void initializeWorkerThreads() {
-		threadPool = new WorkerThread[workerThreadCount];
 		for (int i = 0; i < workerThreadCount; i++) {
-			threadPool[i] = new WorkerThread(this, taskQueue);
-			threadPool[i].setName("Thread: " + i + " -- ");
-			threadPool[i].start();
+			WorkerThread worker = new WorkerThread(this, taskQueue);
+			worker.setName("Worker_" + i);
+			worker.start();
+			idleWorkers.add(worker);
 		}
 	}
 	
+	public WorkerThread getIdleWorker() {
+		WorkerThread worker = null;
+		synchronized (idleWorkers) {
+			if (idleWorkers.size() > 0) {
+				worker = idleWorkers.remove();
+			}
+		}
+		
+		return worker;
+	}
 	
-	
+	public void addWorkerBack(WorkerThread worker) {
+		synchronized (idleWorkers) {
+			idleWorkers.add(worker);
+		}
+	}
 	
 
 }
