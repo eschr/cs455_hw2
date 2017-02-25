@@ -37,6 +37,7 @@ public class Client {
 		}
 		catch (Exception e) { 
 			System.out.println(e.getMessage() + "startClient"); 
+			System.out.println("TEST TEXT");
 		}
 
 		while (true) {
