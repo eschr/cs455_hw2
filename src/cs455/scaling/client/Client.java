@@ -36,7 +36,7 @@ public class Client {
 	public void startClient() throws Exception {
 		clientSocketChannel = SocketChannel.open();
 		clientSocketChannel.configureBlocking(false);
-		clientSocketChannel.register(clientSelector, SelectionKey.OP_CONNECT | SelectionKey.OP_READ | SelectionKey.OP_WRITE);
+		clientSocketChannel.register(clientSelector, SelectionKey.OP_CONNECT);
 		try {
 			clientSocketChannel.connect(serverAddress);
 			clientSocketChannel.finishConnect();
@@ -99,7 +99,7 @@ public class Client {
 		System.out.println("Connectable...");
 		channel.finishConnect();
 		System.out.println("CONNECTED");
-		channel.register(clientSelector, SelectionKey.OP_READ);
+		channel.register(clientSelector, SelectionKey.OP_READ | SelectionKey.OP_WRITE);
 	}
 	
 	public static void main(String args[]) throws Exception {
