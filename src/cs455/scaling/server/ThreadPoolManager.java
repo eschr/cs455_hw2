@@ -31,11 +31,11 @@ public class ThreadPoolManager {
 	public static void main(String args[]) throws InterruptedException {
 		ThreadPoolManager manager = new ThreadPoolManager(5);
 		manager.initialize();
-		
+		/*
 		for (int i = 0; i < 50000000; i++) {
 			manager.addTask(new Task("Hello -- " + i));
 		}
-		
+		*/
 		Thread.sleep(2000);
 		
 		System.out.println(manager.getCount());

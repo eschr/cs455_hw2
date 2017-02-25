@@ -1,5 +1,6 @@
 package cs455.scaling.server;
 
+import java.io.IOException;
 import java.math.BigInteger;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -25,12 +26,16 @@ public class WorkerThread extends Thread {
 				threadPool.increment();
 			} catch (NoSuchAlgorithmException e) {
 				e.printStackTrace();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
 			}
 		}
 	}
 	
-	private void processTask(Task task) throws NoSuchAlgorithmException {
+	private void processTask(Task task) throws NoSuchAlgorithmException, IOException {
 		workDone++;
+		task.readFromChannel();
 		if (workDone % 10000 == 0) 
 			System.out.println(this.getName() + SHA1FromBytes(task.getBytes()) + " WORK: " + workDone);
 		else {

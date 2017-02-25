@@ -1,6 +1,9 @@
 package cs455.scaling.server;
 
 import java.io.IOException;
+import java.nio.channels.SelectionKey;
+
+import cs455.scaling.resources.Task;
 
 public class Server {
 	
@@ -15,7 +18,7 @@ public class Server {
 	public void initiate() throws IOException {
 		threadPoolManager = new ThreadPoolManager(workerThreadCount);
 		try {
-			ServerChannel serverChannel = new ServerChannel(portNum);
+			ServerChannel serverChannel = new ServerChannel(portNum, this);
 			new Thread(serverChannel).start();
 		}
 		catch (IOException e) {
@@ -30,5 +33,9 @@ public class Server {
 		}
 		Server server = new Server(Integer.parseInt(args[0]), Integer.parseInt(args[1]));
 		server.initiate();
+	}
+	
+	public void acceptRead(SelectionKey key) {
+		threadPoolManager.addTask(new Task(key));
 	}
 }
