@@ -18,11 +18,11 @@ public class ThreadPool {
 		idleWorkers = new LinkedList<WorkerThread>();
 	}
 	
-	public synchronized void increment() {
-		count++;
+	public synchronized void increment(int sum) {
+		count += sum;
 	}
 	
-	public int getCount() { return count; }
+	public synchronized int getCount() { return count; }
 	
 	public void initializeWorkerThreads() {
 		for (int i = 0; i < workerThreadCount; i++) {

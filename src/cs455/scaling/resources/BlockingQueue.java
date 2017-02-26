@@ -17,7 +17,6 @@ public class BlockingQueue {
 		synchronized(this) {
 			try {
 				taskList.add(task);
-				System.out.println(taskList.size());
 				notifyAll();
 			}
 			catch (Exception e) {

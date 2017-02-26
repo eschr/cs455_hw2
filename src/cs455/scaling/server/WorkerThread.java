@@ -27,7 +27,6 @@ public class WorkerThread extends Thread {
 		while (true) {
 			try {
 				processTask(workQueue.get());
-				threadPool.increment();
 			} catch (NoSuchAlgorithmException e) {
 				e.printStackTrace();
 			} catch (IOException e) {
@@ -45,7 +44,8 @@ public class WorkerThread extends Thread {
 		if (type == READ) {
 			SelectionKey key = task.getKey();
 		    key.interestOps(key.interestOps() & (~SelectionKey.OP_READ));
-			task.readAndSendBackEcho();
+			int val = task.readAndSendBackEcho();
+			threadPool.increment(val);
 			key.interestOps (key.interestOps(  ) | SelectionKey.OP_READ);
             // Cycle the selector so this key is active again
             key.selector().wakeup(  );

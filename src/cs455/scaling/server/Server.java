@@ -27,6 +27,11 @@ public class Server {
 		}
 	}
 	
+	public int getResults() {
+		return threadPoolManager.getCount();
+	}
+
+	
 	public static void main(String args[]) throws IOException {
 		if (args.length != 2) {
 			System.out.println("See usage: java bin/ cs455.scaling.server.Server <portnum> <thread-pool-size>");
@@ -34,6 +39,12 @@ public class Server {
 		}
 		Server server = new Server(Integer.parseInt(args[0]), Integer.parseInt(args[1]));
 		server.initiate();
+		Runtime.getRuntime().addShutdownHook(new Thread(new Runnable() {
+	        public void run() {
+	            System.out.println("In shutdown hook");
+	            System.out.println(server.getResults());
+	        }
+	    }, "Shutdown-thread"));
 	}
 	
 	public void acceptRead(SelectionKey key) {

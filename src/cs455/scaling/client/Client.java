@@ -24,6 +24,7 @@ public class Client {
 	private 	  SocketChannel clientSocketChannel;
 	private 	  Selector clientSelector;
 	static BufferedReader userInputReader = null;
+	private Writer writer;
 	
 	public Client(String server, int port, int rate) throws IOException {
 		serverHost = server;
@@ -37,16 +38,10 @@ public class Client {
 		clientSocketChannel = SocketChannel.open();
 		clientSocketChannel.configureBlocking(false);
 		clientSocketChannel.register(clientSelector, SelectionKey.OP_CONNECT);
-		try {
-			clientSocketChannel.connect(serverAddress);
-			clientSocketChannel.finishConnect();
-		}
-		catch (Exception e) { 
-			System.out.println(e.getMessage() + "startClient"); 
-			System.out.println("TEST TEXT");
-		}
-		
-		new Thread(new Writer(messageRate)).start();
+		clientSocketChannel.connect(serverAddress);
+	
+		writer = new Writer(messageRate, clientSocketChannel, clientSelector);
+		new Thread(writer).start();
 
 		while (true) {
 			clientSelector.select();
@@ -60,18 +55,21 @@ public class Client {
 				if (key.isReadable()) {
 					String msg = processRead(key);
 					System.out.println("Server says: " + msg);
+					key.interestOps(SelectionKey.OP_WRITE);
 				}
 				
 				else if (key.isWritable()) {
-					System.out.print("Please enter a message(Bye to quit):");
+					/*System.out.print("Please enter a message(Bye to quit):");
 				    String msg = userInputReader.readLine();
 				        
 				    if (msg.equalsIgnoreCase("bye")) {
 				    	System.exit(-1);
-				    }
+				    }*/
+					String msg = writer.getMessage();
 				    SocketChannel sChannel = (SocketChannel) key.channel();
 				    ByteBuffer buffer = ByteBuffer.wrap(msg.getBytes());
 				    sChannel.write(buffer);
+				    key.interestOps(SelectionKey.OP_READ);
 				}
 				
 				else if (key.isConnectable()) {
@@ -99,7 +97,7 @@ public class Client {
 		System.out.println("Connectable...");
 		channel.finishConnect();
 		System.out.println("CONNECTED");
-		channel.register(clientSelector, SelectionKey.OP_READ | SelectionKey.OP_WRITE);
+		channel.register(clientSelector, SelectionKey.OP_WRITE);
 	}
 	
 	public static void main(String args[]) throws Exception {

@@ -54,9 +54,8 @@ public class ServerChannel implements Runnable {
 						System.out.println(e.getMessage() + " in ServerChannel run()");
 					}
 				}
-				if (key.isReadable()) {
-					System.out.println("is readable");
-					//key.interestOps(key.interestOps() & (~SelectionKey.OP_READ));
+				else if (key.isReadable()) {
+					//System.out.println("is readable");
 					mainServer.acceptRead(key);
 					/*
 					String msg = "YO";
@@ -78,7 +77,7 @@ public class ServerChannel implements Runnable {
 						}
 					}*/
 				}
-				if (key.isWritable()) {
+				else if (key.isWritable()) {
 					
 				}
 			}

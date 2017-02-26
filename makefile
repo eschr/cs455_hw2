@@ -2,7 +2,7 @@
 
 # Program packages and files
 #   - The packages should be the path inside your src directory. eg: package1 package2/package3
-PACKAGES = cs455/scaling/client cs455/scaling/server
+PACKAGES = cs455/scaling/client cs455/scaling/server cs455/scaling/resources
 
 # Java compiler
 JAVAC = javac
