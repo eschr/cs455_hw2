@@ -75,7 +75,7 @@ public class Task {
 		if (bytesCount > 0) {
 			buffer.flip();
 			String message = new String(buffer.array());
-			this.message = message;
+			this.message = message.trim();
 			this.bytes = this.message.getBytes();
 			System.out.println(this.message);
 		}

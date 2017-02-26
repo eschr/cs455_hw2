@@ -27,7 +27,6 @@ public class WorkerThread extends Thread {
 		while (true) {
 			try {
 				processTask(workQueue.get());
-				System.out.print("THREAD: " + this.getName());
 			} catch (NoSuchAlgorithmException e) {
 				e.printStackTrace();
 			} catch (IOException e) {
