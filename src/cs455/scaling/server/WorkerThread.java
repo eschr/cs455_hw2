@@ -27,6 +27,7 @@ public class WorkerThread extends Thread {
 		while (true) {
 			try {
 				processTask(workQueue.get());
+				System.out.print("THREAD: " + this.getName());
 			} catch (NoSuchAlgorithmException e) {
 				e.printStackTrace();
 			} catch (IOException e) {
@@ -38,31 +39,34 @@ public class WorkerThread extends Thread {
 	
 	private synchronized void incrementWork() { workDone++; }
 	
+	private void addTaskBacktoQueue(Task t) { 
+		workQueue.put(t);
+	}
+	
 	private void processTask(Task task) throws NoSuchAlgorithmException, IOException {
 		incrementWork();
 		int type = task.getType();
+		SelectionKey key = task.getKey();
 		if (type == READ) {
-			SelectionKey key = task.getKey();
-		    key.interestOps(key.interestOps() & (~SelectionKey.OP_READ));
-			int val = task.readAndSendBackEcho();
-			threadPool.increment(val);
-			key.interestOps (key.interestOps(  ) | SelectionKey.OP_READ);
-            // Cycle the selector so this key is active again
-            key.selector().wakeup(  );
+			task.readFromBuffer();
+			task.setType(HASH);
+			addTaskBacktoQueue(task);
 		}
 		else if (type == HASH) {
-			System.out.println(this.getName() + SHA1FromBytes(task.getBytes()) + " WORK: " + workDone);
+			String hash = SHA1FromBytes(task.getBytes());
+			System.out.println(hash);
+			task.setHash(hash);
+			task.setType(WRITE);
+			addTaskBacktoQueue(task);
 		}
 		else {
-			//Do write actions
+			task.writeHashBackToClient();
+			if (key.isValid()) {
+				key.interestOps(SelectionKey.OP_READ);
+				key.selector().wakeup();
+			}
 		}
 		
-		/*
-		if (workDone % 100 == 0) 
-			System.out.println(this.getName() + SHA1FromBytes(task.getBytes()) + " WORK: " + workDone);
-		else {
-			SHA1FromBytes(task.getBytes());
-		}*/
 	}
 	
 	private String SHA1FromBytes(byte[] bytes) throws NoSuchAlgorithmException {

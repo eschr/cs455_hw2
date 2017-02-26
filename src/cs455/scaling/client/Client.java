@@ -25,6 +25,7 @@ public class Client {
 	private 	  Selector clientSelector;
 	static BufferedReader userInputReader = null;
 	private Writer writer;
+	private static final int buffSize = 64;
 	
 	public Client(String server, int port, int rate) throws IOException {
 		serverHost = server;
@@ -53,23 +54,15 @@ public class Client {
 				if (! key.isValid()) continue;
 				
 				if (key.isReadable()) {
+					key.interestOps(key.interestOps() & (~SelectionKey.OP_READ));
 					String msg = processRead(key);
 					System.out.println("Server says: " + msg);
+					writer.removeStringFromMap(msg);
 					key.interestOps(SelectionKey.OP_WRITE);
 				}
 				
 				else if (key.isWritable()) {
-					/*System.out.print("Please enter a message(Bye to quit):");
-				    String msg = userInputReader.readLine();
-				        
-				    if (msg.equalsIgnoreCase("bye")) {
-				    	System.exit(-1);
-				    }*/
-					String msg = writer.getMessage();
-				    SocketChannel sChannel = (SocketChannel) key.channel();
-				    ByteBuffer buffer = ByteBuffer.wrap(msg.getBytes());
-				    sChannel.write(buffer);
-				    key.interestOps(SelectionKey.OP_READ);
+			
 				}
 				
 				else if (key.isConnectable()) {
@@ -80,17 +73,60 @@ public class Client {
 		}
 	}
 	
-	  public static String processRead(SelectionKey key) throws Exception {
-		    SocketChannel sChannel = (SocketChannel) key.channel();
-		    ByteBuffer buffer = ByteBuffer.allocate(1024);
-		    sChannel.read(buffer);
-		    buffer.flip();
-		    Charset charset = Charset.forName("UTF-8");
-		    CharsetDecoder decoder = charset.newDecoder();
-		    CharBuffer charBuffer = decoder.decode(buffer);
-		    String msg = charBuffer.toString();
-		    return msg;
+	public static String processRead(SelectionKey key) throws Exception {
+		SocketChannel sChannel = (SocketChannel) key.channel();
+		ByteBuffer buffer = ByteBuffer.allocate(1024);
+		sChannel.read(buffer);
+		buffer.flip();
+		Charset charset = Charset.forName("UTF-8");
+		CharsetDecoder decoder = charset.newDecoder();
+		CharBuffer charBuffer = decoder.decode(buffer);
+		String msg = charBuffer.toString();
+		System.out.println(msg);
+		return msg;
 	}
+	/*
+	public String processRead(SelectionKey key) throws IOException {
+		SocketChannel channel = (SocketChannel) key.channel(); 
+		ByteBuffer buffer = ByteBuffer.allocate(buffSize);
+		int read = 0;
+		try {
+			while (buffer.hasRemaining() && read != -1) {
+				read = channel.read(buffer); 
+			}
+		} catch (IOException e) {
+			System.out.println(e.getMessage() + " Client processRead()");
+			key.cancel();
+			channel.close();
+		}
+		
+		if (read == -1) {
+			key.cancel();
+			channel.close();
+		}
+		
+		buffer.flip();
+		Charset charset = Charset.forName("UTF-8");
+		CharsetDecoder decoder = charset.newDecoder();
+		CharBuffer charBuffer = decoder.decode(buffer);
+		String msg = charBuffer.toString();
+		System.out.println(msg);
+		return msg;
+	
+	}*/
+	
+	/*
+	public static String processRead(SelectionKey key) throws Exception {
+		SocketChannel sChannel = (SocketChannel) key.channel();
+		ByteBuffer buffer = ByteBuffer.allocate(22);
+		sChannel.read(buffer);
+		buffer.flip();
+		Charset charset = Charset.forName("UTF-8");
+		CharsetDecoder decoder = charset.newDecoder();
+		CharBuffer charBuffer = decoder.decode(buffer);
+		String msg = charBuffer.toString();
+		return msg;
+	}*/
 	
 	private void connect(SelectionKey key) throws IOException {
 		SocketChannel channel = (SocketChannel) key.channel();

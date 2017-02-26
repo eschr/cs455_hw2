@@ -1,8 +1,14 @@
 package cs455.scaling.client;
 
+import java.io.IOException;
+import java.math.BigInteger;
+import java.nio.ByteBuffer;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.SocketChannel;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.util.HashMap;
 import java.util.Random;
 
 public class Writer implements Runnable {
@@ -13,12 +19,14 @@ public class Writer implements Runnable {
 	private Random randomGen; 
 	private Selector clientSelector;
 	private int total;
+	private final HashMap<String, Integer> messagesHashList;
 	
 	public Writer(int messageRate, SocketChannel clientChannel, Selector selector) {
 		this.messageRate = messageRate;
 		channel = clientChannel;
 		randomGen = new Random();
 		clientSelector = selector;
+		messagesHashList = new HashMap<String, Integer>();
 	}
 	
 	@Override
@@ -26,12 +34,24 @@ public class Writer implements Runnable {
 		System.out.println("Starting message sending at rate: " + messageRate + " messages / sec");
 		while (true) {
 			try {
-				Thread.sleep(100);
+				Thread.sleep(1000 / messageRate);
 				int next = randomGen.nextInt(1000);
 				total += next;
-				setMessage("Hello" + "<===>" +  next);
-				channel.keyFor(clientSelector).interestOps(SelectionKey.OP_WRITE);
-				clientSelector.wakeup();
+				String msg = "Hello" + "<===>" +  next;
+				System.out.println("Sending: " + msg);
+				setMessage(msg);
+				try {
+					addMessageToMap(msg);
+				} catch (NoSuchAlgorithmException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				try {
+					writeMessage(msg);
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
 			} catch (InterruptedException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -42,6 +62,51 @@ public class Writer implements Runnable {
 			
 			
 		}
+	}
+	
+	private void writeMessage(String message) throws IOException {
+	    ByteBuffer buffer = ByteBuffer.wrap(message.getBytes());
+	    channel.write(buffer);
+	    channel.keyFor(clientSelector).interestOps(SelectionKey.OP_READ);
+	}
+	
+	private void addMessageToMap(String msg) throws NoSuchAlgorithmException {
+		String hash = SHA1FromBytes(msg.getBytes()).trim();
+		System.out.println(hash);
+		synchronized (messagesHashList) {
+			if (messagesHashList.containsKey(hash)) {
+				messagesHashList.put(hash, messagesHashList.get(hash) + 1);
+			} else {
+				messagesHashList.put(hash, 1);
+			}
+		}
+		
+	}
+	
+	public void removeStringFromMap(String msg) throws NoSuchAlgorithmException {
+		removeHashString(msg.trim());
+	}
+	
+	private void removeHashString(String hash) {
+		synchronized(messagesHashList) {
+			if (! messagesHashList.containsKey(hash)) {
+				System.out.println("--------------HASH: " + hash + " not found in the map----------");
+				return;
+			}
+			if (messagesHashList.get(hash) == 1) {
+				messagesHashList.remove(hash);
+				System.out.println("HASH removed successfully!  *************");
+			}
+			else messagesHashList.put(hash, messagesHashList.get(hash) - 1);
+		}
+	}
+	
+	private String SHA1FromBytes(byte[] bytes) throws NoSuchAlgorithmException {
+		MessageDigest digest = MessageDigest.getInstance("SHA1");
+		byte[] hash = digest.digest(bytes);
+		 
+		BigInteger hashBigInt = new BigInteger(1, hash);
+		return hashBigInt.toString(16);
 	}
 	
 	public synchronized void setMessage(String msg) {
