@@ -82,7 +82,7 @@ public class Client {
 		CharsetDecoder decoder = charset.newDecoder();
 		CharBuffer charBuffer = decoder.decode(buffer);
 		String msg = charBuffer.toString();
-		System.out.println(msg);
+		//System.out.println(msg);
 		return msg;
 	}
 	/*

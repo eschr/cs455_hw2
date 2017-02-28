@@ -23,6 +23,7 @@ public class Writer implements Runnable {
 	private int total;
 	//private final HashMap<String, Integer> messagesHashList;
 	private final LinkedList<String> messagesHashList;
+	private static final int BUFFER_SIZE = 8192;
 	
 	public Writer(int messageRate, SocketChannel clientChannel, Selector selector) {
 		this.messageRate = messageRate;
@@ -37,20 +38,21 @@ public class Writer implements Runnable {
 		System.out.println("Starting message sending at rate: " + messageRate + " messages / sec");
 		while (true) {
 			try {
-				Thread.sleep(1000 / messageRate);
-				int next = randomGen.nextInt(1000);
-				total += next;
-				String msg = "Hello" + "<===>" +  next;
-				System.out.println("Sending: " + msg);
-				setMessage(msg);
+				//int next = randomGen.nextInt(1000);
+				//total += next;
+				//String msg = "Hello" + "<===>" +  next;
+				//System.out.println("Sending: " + msg);
+				byte[] nextMessage = new byte[BUFFER_SIZE];
+				randomGen.nextBytes(nextMessage);
 				try {
-					addMessageToMap(msg);
+					addMessageToMap(nextMessage);
 				} catch (NoSuchAlgorithmException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
+				Thread.sleep(1000 / messageRate);
 				try {
-					writeMessage(msg);
+					writeMessage(nextMessage);
 				} catch (IOException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
@@ -67,15 +69,15 @@ public class Writer implements Runnable {
 		}
 	}
 	
-	private void writeMessage(String message) throws IOException {
-	    ByteBuffer buffer = ByteBuffer.wrap(message.getBytes());
+	private void writeMessage(byte[] message) throws IOException {
+	    ByteBuffer buffer = ByteBuffer.wrap(message);
 	    channel.write(buffer);
 	    channel.keyFor(clientSelector).interestOps(SelectionKey.OP_READ);
 	}
 	
-	private void addMessageToMap(String msg) throws NoSuchAlgorithmException {
-		String hash = SHA1FromBytes(msg.trim().getBytes());
-		System.out.println(hash);
+	private void addMessageToMap(byte[] message) throws NoSuchAlgorithmException {
+		String hash = SHA1FromBytes(message);
+		System.out.println("Sending: " + hash);
 		synchronized (messagesHashList) {
 			messagesHashList.add(hash);
 			/*if (messagesHashList.containsKey(hash)) {
@@ -100,7 +102,7 @@ public class Writer implements Runnable {
 			
 			if (found) {
 				messagesHashList.remove(hash);
-				System.out.println("Removed hash from list, size: " + messagesHashList.size());
+				System.out.println("Removed " + hash + " from list, size: " + messagesHashList.size());
 			}
 			else System.out.println("--------------HASH: " + hash + " not found in the map----------");
 			/*if (! messagesHashList.containsKey(hash)) {
@@ -125,6 +127,10 @@ public class Writer implements Runnable {
 	
 	public synchronized void setMessage(String msg) {
 		message = msg;
+	}
+	
+	public synchronized void setByteMessage(byte[] message) {
+		
 	}
 
 	public synchronized String getMessage() {

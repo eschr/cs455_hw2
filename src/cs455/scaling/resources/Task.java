@@ -22,17 +22,17 @@ public class Task {
 	private int val;
 	private String message, hashValue;
 	
-	private final int buffSize = 1024;
+	private final int BUFF_SIZE = 8192;
 	
 	private int taskType;
 	
-	private ByteBuffer buffer = ByteBuffer.allocate(100);
+	private ByteBuffer buffer = ByteBuffer.allocate(BUFF_SIZE);
 	
 	public Task(SelectionKey key, int type) {
 		this.key = key;
 		taskType = type;
 		val = 0;
-		bytes = "000".getBytes();
+		bytes = new byte[BUFF_SIZE];
 	}
 	
 	public SelectionKey getKey() { return key; }
@@ -61,8 +61,34 @@ public class Task {
 	}
 	
 	public byte[] getBytes() { return bytes; }
-
+	
 	public void readFromBuffer() throws IOException {
+		buffer.clear();
+		SocketChannel channel = (SocketChannel) key.channel();
+		int readResult = 0;
+		
+		try {
+			while (buffer.hasRemaining() && readResult != -1)  {
+				readResult = channel.read(buffer);
+			}
+		}
+		catch (IOException e) {
+			System.out.println(e.getMessage() + " in Task readFromBuffer()");
+		}
+		
+		if (readResult == -1) {
+			System.out.println("negative one exception");
+		}
+		
+		if (readResult > 0) {
+			buffer.flip();
+			buffer.get(this.bytes);
+			System.out.println("Read bytes into byte[]");
+		}
+	}
+		
+
+	/*public void readFromBuffer() throws IOException {
 		SocketChannel sChannel = (SocketChannel) key.channel();
 		ByteBuffer buffer = ByteBuffer.allocate(1024);
 		int bytesCount = sChannel.read(buffer);
@@ -80,7 +106,7 @@ public class Task {
 			System.out.println(this.message);
 		}
 
-		/*SocketChannel channel = (SocketChannel) key.channel(); 
+		SocketChannel channel = (SocketChannel) key.channel(); 
 		ByteBuffer buffer = ByteBuffer.allocate(buffSize);
 		int read = 0;
 		try {
@@ -108,8 +134,8 @@ public class Task {
 		this.message = msg;
 		
 		if (key.isValid())
-			key.interestOps(SelectionKey.OP_WRITE);*/
-	}
+			key.interestOps(SelectionKey.OP_WRITE);
+	}*/
 	
 	public void writeHashBackToClient() throws IOException {
 		if (key.isValid()) {

@@ -53,7 +53,7 @@ public class WorkerThread extends Thread {
 		}
 		else if (type == HASH) {
 			String hash = SHA1FromBytes(task.getBytes());
-			System.out.println(hash);
+			System.out.println("Client sent: " + hash);
 			task.setHash(hash);
 			task.setType(WRITE);
 			addTaskBacktoQueue(task);
