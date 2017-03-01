@@ -24,6 +24,8 @@ public class Writer implements Runnable {
 	//private final HashMap<String, Integer> messagesHashList;
 	private final LinkedList<String> messagesHashList;
 	private static final int BUFFER_SIZE = 8192;
+	private int sentCount = 0;
+	private int receivedCount = 0;
 	
 	public Writer(int messageRate, SocketChannel clientChannel, Selector selector) {
 		this.messageRate = messageRate;
@@ -31,6 +33,18 @@ public class Writer implements Runnable {
 		randomGen = new Random();
 		clientSelector = selector;
 		messagesHashList = new LinkedList<String>();
+	}
+	
+	public int getSentCountAndReset() {
+		int sent = sentCount;
+		sentCount = 0;
+		return sent;
+	}
+	
+	public int getRecievedCountAndReset() {
+		int received = receivedCount;
+		receivedCount = 0;
+		return received;
 	}
 	
 	@Override
@@ -52,6 +66,7 @@ public class Writer implements Runnable {
 				}
 				Thread.sleep(1000 / messageRate);
 				try {
+					sentCount++;
 					writeMessage(nextMessage);
 				} catch (IOException e) {
 					// TODO Auto-generated catch block
@@ -62,7 +77,7 @@ public class Writer implements Runnable {
 				e.printStackTrace();
 			}
 			finally {
-				System.out.println("Total - " + total);
+				//System.out.println("Total - " + total);
 			}
 			
 			
@@ -77,7 +92,7 @@ public class Writer implements Runnable {
 	
 	private void addMessageToMap(byte[] message) throws NoSuchAlgorithmException {
 		String hash = SHA1FromBytes(message);
-		System.out.println("Sending: " + hash);
+		//System.out.println("Sending: " + hash);
 		synchronized (messagesHashList) {
 			messagesHashList.add(hash);
 			/*if (messagesHashList.containsKey(hash)) {
@@ -90,6 +105,7 @@ public class Writer implements Runnable {
 	}
 	
 	public void removeStringFromMap(String msg) throws NoSuchAlgorithmException {
+		receivedCount++;
 		removeHashString(msg.trim());
 	}
 	
@@ -102,7 +118,7 @@ public class Writer implements Runnable {
 			
 			if (found) {
 				messagesHashList.remove(hash);
-				System.out.println("Removed " + hash + " from list, size: " + messagesHashList.size());
+				//System.out.println("Removed " + hash + " from list, size: " + messagesHashList.size());
 			}
 			else System.out.println("--------------HASH: " + hash + " not found in the map----------");
 			/*if (! messagesHashList.containsKey(hash)) {

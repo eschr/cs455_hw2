@@ -42,6 +42,7 @@ public class Client {
 		clientSocketChannel.connect(serverAddress);
 	
 		writer = new Writer(messageRate, clientSocketChannel, clientSelector);
+		new Thread(new ClientStats(writer)).start();
 		new Thread(writer).start();
 
 		while (true) {
@@ -56,7 +57,7 @@ public class Client {
 				if (key.isReadable()) {
 					key.interestOps(key.interestOps() & (~SelectionKey.OP_READ));
 					String msg = processRead(key);
-					System.out.println("Server says: " + msg);
+					//System.out.println("Server says: " + msg);
 					writer.removeStringFromMap(msg);
 					key.interestOps(SelectionKey.OP_WRITE);
 				}
