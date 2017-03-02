@@ -9,6 +9,7 @@ public class Server {
 	
 	private int portNum, workerThreadCount;
 	private ThreadPoolManager threadPoolManager;
+	private ServerChannel serverChannel;
 	
 	public Server(int port, int poolSize) {
 		portNum = port;
@@ -19,18 +20,26 @@ public class Server {
 		threadPoolManager = new ThreadPoolManager(workerThreadCount);
 		threadPoolManager.initialize();
 		try {
-			ServerChannel serverChannel = new ServerChannel(portNum, this);
+			serverChannel = new ServerChannel(portNum, this);
 			new Thread(serverChannel).start();
 		}
 		catch (IOException e) {
 			System.out.println(e.getMessage() + " in Server initiate()");
 		}
+		
+		new Thread(new ServerStats(this)).start();
 	}
 	
-	public int getResults() {
-		return threadPoolManager.getCount();
+	
+	public String getReadWriteStats() {
+		int reads = threadPoolManager.getReadCount() / 5;
+		int writes = threadPoolManager.getWriteCount() / 5;
+		return reads + ":" + writes + "/s";
 	}
-
+	
+	public int getActiveConnections() {
+		return serverChannel.getClientCount();
+	}
 	
 	public static void main(String args[]) throws IOException {
 		if (args.length != 2) {
@@ -39,12 +48,6 @@ public class Server {
 		}
 		Server server = new Server(Integer.parseInt(args[0]), Integer.parseInt(args[1]));
 		server.initiate();
-		Runtime.getRuntime().addShutdownHook(new Thread(new Runnable() {
-	        public void run() {
-	            System.out.println("In shutdown hook");
-	            System.out.println(server.getResults());
-	        }
-	    }, "Shutdown-thread"));
 	}
 	
 	public void acceptRead(SelectionKey key) {

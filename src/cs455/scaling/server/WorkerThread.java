@@ -49,17 +49,19 @@ public class WorkerThread extends Thread {
 		if (type == READ) {
 			task.readFromBuffer();
 			task.setType(HASH);
+			threadPool.incrementRead();
 			addTaskBacktoQueue(task);
 		}
 		else if (type == HASH) {
 			String hash = SHA1FromBytes(task.getBytes());
-			System.out.println("Client sent: " + hash);
+			//System.out.println("Client sent: " + hash);
 			task.setHash(hash);
 			task.setType(WRITE);
 			addTaskBacktoQueue(task);
 		}
 		else {
 			task.writeHashBackToClient();
+			threadPool.incrementWrites();
 			if (key.isValid()) {
 				key.interestOps(SelectionKey.OP_READ);
 				key.selector().wakeup();

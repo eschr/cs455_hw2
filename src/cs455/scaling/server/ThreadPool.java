@@ -10,7 +10,7 @@ public class ThreadPool {
 	private int workerThreadCount;
 	private LinkedList<WorkerThread> idleWorkers;
 	private final BlockingQueue taskQueue;
-	private int count;
+	private int readCount, writeCount;
 	
 	public ThreadPool(int size, BlockingQueue queue) {
 		workerThreadCount = size; 
@@ -18,11 +18,23 @@ public class ThreadPool {
 		idleWorkers = new LinkedList<WorkerThread>();
 	}
 	
-	public synchronized void increment(int sum) {
-		count += sum;
+	public synchronized void incrementRead() {
+		readCount++;
 	}
-	
-	public synchronized int getCount() { return count; }
+	public synchronized void incrementWrites() {
+		writeCount++;
+	}
+ 	
+	public synchronized int getReadCount() { 
+		int temp = readCount;
+		readCount = 0;
+		return temp;
+	}
+	public synchronized int getWriteCount() { 
+		int temp = writeCount;
+		writeCount = 0;
+		return temp;
+	}
 	
 	public void initializeWorkerThreads() {
 		for (int i = 0; i < workerThreadCount; i++) {

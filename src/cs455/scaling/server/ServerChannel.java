@@ -17,6 +17,7 @@ public class ServerChannel implements Runnable {
 	private ServerSocketChannel serverSocketChannel;
 	private Selector serverSelector;
 	private Server mainServer;
+	private int connectionCount;
 	
 	public ServerChannel(int port, Server server) throws IOException {
 		mainServer = server;
@@ -30,6 +31,8 @@ public class ServerChannel implements Runnable {
 		serverSocketChannel.register(serverSelector, SelectionKey.OP_ACCEPT);
 		
 	}
+	
+	public int getClientCount() { return connectionCount; }
 	
 
 	@Override
@@ -97,6 +100,7 @@ public class ServerChannel implements Runnable {
 		try {
 			SocketChannel socketChannel = serverSoc.accept();
 			System.out.println("Accepting incoming connection...");
+			connectionCount++;
 			
 			if (socketChannel != null) {
 				socketChannel.configureBlocking(false);

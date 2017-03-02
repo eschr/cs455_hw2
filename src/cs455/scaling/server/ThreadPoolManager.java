@@ -25,7 +25,8 @@ public class ThreadPoolManager {
 		taskQueue.put(t);
 	}
 	
-	public int getCount() { return threadPool.getCount(); }
+	public int getReadCount() { return threadPool.getReadCount(); }
+	public int getWriteCount() { return threadPool.getWriteCount(); }
 	
 	
 	public static void main(String args[]) throws InterruptedException {
@@ -38,7 +39,7 @@ public class ThreadPoolManager {
 		
 		Thread.sleep(2000);
 		
-		System.out.println(manager.getCount());
+
 	}
 	
 	

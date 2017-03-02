@@ -83,7 +83,7 @@ public class Task {
 		if (readResult > 0) {
 			buffer.flip();
 			buffer.get(this.bytes);
-			System.out.println("Read bytes into byte[]");
+			//System.out.println("Read bytes into byte[]");
 		}
 	}
 		
