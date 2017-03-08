@@ -1,3 +1,14 @@
+/*
+ * Author: Eric Schraeder 
+ * March 2017
+ * CSU CS 455 HW2-PC
+ * 
+ * Implementation of scalable server using Java NIO library.  
+ * 
+ * Server.java starts the NIO ServerSocketChannel and Thread Pool Manager
+ * 
+ */
+
 package cs455.scaling.server;
 
 import java.io.IOException;
@@ -31,6 +42,7 @@ public class Server {
 	}
 	
 	
+	// Accessed by ServerStats Thread to print out Server throughput every 5 seconds 
 	public String getReadWriteStats() {
 		int reads = threadPoolManager.getReadCount() / 5;
 		int writes = threadPoolManager.getWriteCount() / 5;

@@ -1,3 +1,10 @@
+/*
+ * Author: Eric Schraeder 
+ * March 2017
+ * CSU CS 455 HW2-PC
+ * 
+ */
+
 package cs455.scaling.resources;
 
 import java.util.LinkedList;

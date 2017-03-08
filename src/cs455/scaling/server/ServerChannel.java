@@ -1,3 +1,17 @@
+/*
+ * Author: Eric Schraeder 
+ * March 2017
+ * CSU CS 455 HW2-PC
+ * 
+ * ServerChannel Thread runs a Java NIO ServerSocketChannel.
+ * 
+ * Switches on keys after Selector.select()
+ * 		-accepts incoming connections from clients
+ * 		-hands off keys for channels that are readable to the ThreadPoolManager
+ * 
+ * 
+ */
+
 package cs455.scaling.server;
 
 import java.io.IOException;
@@ -60,16 +74,6 @@ public class ServerChannel implements Runnable {
 					// System.out.println("is readable");
 					key.interestOps(key.interestOps() & (~SelectionKey.OP_READ));
 					mainServer.acceptRead(key);
-					/*
-					 * String msg = "YO"; try { msg = processRead(key);
-					 * System.out.println("Received from client: " + msg); }
-					 * catch (Exception e1) { // TODO Auto-generated catch block
-					 * e1.printStackTrace(); } if (msg.length() > 0) {
-					 * SocketChannel sChannel = (SocketChannel) key.channel();
-					 * ByteBuffer buffer = ByteBuffer.wrap(msg.getBytes()); try
-					 * { sChannel.write(buffer); } catch (IOException e) { //
-					 * TODO Auto-generated catch block e.printStackTrace(); } }
-					 */
 				}
 				else if (key.isWritable()) {
 			
@@ -78,21 +82,7 @@ public class ServerChannel implements Runnable {
 		}
 		
 	}
-	
-	public static String processRead(SelectionKey key) throws Exception {
-		SocketChannel sChannel = (SocketChannel) key.channel();
-		ByteBuffer buffer = ByteBuffer.allocate(1024);
-		int bytesCount = sChannel.read(buffer);
-		if (bytesCount == -1) {
-			key.cancel();
-			sChannel.close();
-		}
-		if (bytesCount > 0) {
-			buffer.flip();
-			return new String(buffer.array());
-		}
-		return "NoMessage";
-	}
+
 	
 	
 	private void acceptIncomingConnection(SelectionKey key) throws IOException {

@@ -1,3 +1,13 @@
+
+/*
+ * Author: Eric Schraeder 
+ * March 2017
+ * CSU CS 455 HW2-PC
+ * 
+ * ThreadPoolManager creates ThreadPool and adds new jobs to Task Queue
+ * 
+ */
+
 package cs455.scaling.server;
 
 import java.util.LinkedList;
@@ -21,6 +31,7 @@ public class ThreadPoolManager {
 		threadPool.initializeWorkerThreads();
 	}
 	
+	// Add new task to the BlockingQueue
 	public void addTask(Task t) {
 		taskQueue.put(t);
 	}
@@ -29,7 +40,7 @@ public class ThreadPoolManager {
 	public int getWriteCount() { return threadPool.getWriteCount(); }
 	
 	
-	public static void main(String args[]) throws InterruptedException {
+	/*public static void main(String args[]) throws InterruptedException {
 		ThreadPoolManager manager = new ThreadPoolManager(5);
 		manager.initialize();
 		
@@ -40,7 +51,7 @@ public class ThreadPoolManager {
 		Thread.sleep(2000);
 		
 
-	}
+	}*/
 	
 	
 	

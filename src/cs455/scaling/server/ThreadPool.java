@@ -1,3 +1,14 @@
+/*
+ * Author: Eric Schraeder 
+ * March 2017
+ * CSU CS 455 HW2-PC
+ * 
+ * ThreadPool creates <size> count of WorkerThreads, each WorkerThread 
+ * synchronized wait() on the BlockingQueue
+ * 
+ */
+
+
 package cs455.scaling.server;
 
 import java.util.LinkedList;

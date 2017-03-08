@@ -1,3 +1,13 @@
+/*
+ * Author: Eric Schraeder 
+ * March 2017
+ * CSU CS 455 HW2-PC
+ * 
+ * Writer.java writes 8KB randomly generated messages to Server
+ * adds the SHA1 hashes of these messages to List.  
+ * 
+ */
+
 package cs455.scaling.client;
 
 import java.io.IOException;
@@ -52,10 +62,6 @@ public class Writer implements Runnable {
 		System.out.println("Starting message sending at rate: " + messageRate + " messages / sec");
 		while (true) {
 			try {
-				//int next = randomGen.nextInt(1000);
-				//total += next;
-				//String msg = "Hello" + "<===>" +  next;
-				//System.out.println("Sending: " + msg);
 				byte[] nextMessage = new byte[BUFFER_SIZE];
 				randomGen.nextBytes(nextMessage);
 				try {
@@ -95,11 +101,6 @@ public class Writer implements Runnable {
 		//System.out.println("Sending: " + hash);
 		synchronized (messagesHashList) {
 			messagesHashList.add(hash);
-			/*if (messagesHashList.containsKey(hash)) {
-				messagesHashList.put(hash, messagesHashList.get(hash) + 1);
-			} else {
-				messagesHashList.put(hash, 1);
-			}*/
 		}
 		
 	}
@@ -121,15 +122,6 @@ public class Writer implements Runnable {
 				//System.out.println("Removed " + hash + " from list, size: " + messagesHashList.size());
 			}
 			else System.out.println("--------------HASH: " + hash + " not found in the map----------");
-			/*if (! messagesHashList.containsKey(hash)) {
-				System.out.println("--------------HASH: " + hash + " not found in the map----------");
-				return;
-			}
-			if (messagesHashList.get(hash) == 1) {
-				messagesHashList.remove(hash);
-				System.out.println("HASH removed successfully!  *************");
-			}
-			else messagesHashList.put(hash, messagesHashList.get(hash) - 1);*/
 		}
 	}
 	

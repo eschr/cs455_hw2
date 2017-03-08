@@ -1,3 +1,16 @@
+/*
+ * Author: Eric Schraeder 
+ * March 2017
+ * CSU CS 455 HW2-PC
+ * 
+ * WorkerThreads continually gets a new Task from the BlockingQueue or waits until job available
+ * 
+ * processTask() switches on the Task's type and performs the appropriate action, changes Task's type, 
+ * and adds Task object back into the BlockingQueue
+ * 
+ */
+
+
 package cs455.scaling.server;
 
 import java.io.IOException;
@@ -23,6 +36,7 @@ public class WorkerThread extends Thread {
 		this.workQueue = queue;
 	}
 	
+
 	public void run() {
 		while (true) {
 			try {
